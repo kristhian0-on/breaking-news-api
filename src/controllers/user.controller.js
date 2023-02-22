@@ -6,7 +6,10 @@ const create = async (req, res) => {
         if (!name || !username || !email || !password || !avatar || !background) {
             res.status(400).send({message: "Submit all fields for registration"});
         }
-    const user = await userService.createService(req.body);
+    const user = await userService
+        .createService(req.body)
+        .catch((err) => console.log(err.message));
+
     if (!user) {
         return res.status(400).send({ message: 'Error creating User' });
     }
