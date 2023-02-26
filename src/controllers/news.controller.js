@@ -1,4 +1,4 @@
-import { createService, findAllService, countNews, topNewsService, findByIdService, searchByTitleService, byUserService, updateService, } from '../services/news.service.js';
+import { createService, findAllService, countNews, topNewsService, findByIdService, searchByTitleService, byUserService, updateService, eraseService, } from '../services/news.service.js';
 
 export const create = async (req, res) => {
     try {
@@ -168,16 +168,29 @@ export const update = async (req, res) => {
         const { id } = req.params;
 
         if (!title && !text && !banner) {
-            res.status(400).send({ message: 'Submit at least one field to update the post' });
+            res.status(400).send({ message: 'Submit at least one field to update the News' });
         }
 
         const news = await findByIdService(id);
-        console.log(typeof news.user._id, typeof req.userId);
-
+        
         if (String(news.user._id) !== req.userId) {
-            return res.status(400).send({ message: 'You didn`t update this post' });
+            return res.status(400).send({ message: 'You didn`t update this News' });
         }
         await updateService(id, title, text, banner);
-        return res.send({ message: 'Post successfully updated!'});
+        return res.send({ message: 'News successfully updated!'});
+    } catch (err) {res.status(500).send({ message: err.message })};
+};
+
+export const erase = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const news = await findByIdService(id);
+        
+        if (String(news.user._id) !== req.userId) {
+            return res.status(400).send({ message: 'You didn`t delete this News' });
+        }
+        await eraseService(id);
+
+        return res.send({ message: 'News deleted sucessfully!' });
     } catch (err) {res.status(500).send({ message: err.message })};
 };
