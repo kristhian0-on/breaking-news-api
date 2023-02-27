@@ -1,4 +1,4 @@
-import { createService, findAllService, countNews, topNewsService, findByIdService, searchByTitleService, byUserService, updateService, eraseService, likeNewsService, deleteLikeNewsService } from '../services/news.service.js';
+import { createService, findAllService, countNews, topNewsService, findByIdService, searchByTitleService, byUserService, updateService, eraseService, likeNewsService, deleteLikeNewsService, addCommentService, deleteCommentService } from '../services/news.service.js';
 
 export const create = async (req, res) => {
     try {
@@ -209,6 +209,47 @@ export const likeNews = async (req, res) => {
         }
 
         res.send({ message: 'Like done sucessfully' });
+    } catch (err) {
+        res.status(500).send({ message: err.message });
+    }
+};
+
+export const addComment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.userId;
+        const { comment } = req.body;
+
+        if (!comment) {
+            return res.status(400).send({ message: 'Write a message to comment' });
+    }
+    await addCommentService(id, comment, userId);
+    res.send({ message: 'Comment sucessfully completed!' });
+    } catch (err) {
+        res.status(500).send({ message: err.message });
+    }
+};
+
+export const deleteComment = async (req, res) => {
+    try {
+        const { idNews, idComment } = req.params;
+        const userId = req.userId;
+
+        const commentDeleted = await deleteCommentService(idNews, idComment, userId);
+        
+        const commentFinder = commentDeleted.comments.find(
+            (comment) => comment.idComment === idComment
+        );
+
+        if (commentFinder) {
+            return res.status(404).send({ message: 'Comment not found' })
+        }
+
+        if (commentFinder.userId !== userId) {
+            return res.status(400).send({ message: "You can't delete this comment" });
+        }
+
+        res.send({ message: 'Comment sucessfully removed' });
     } catch (err) {
         res.status(500).send({ message: err.message });
     }
